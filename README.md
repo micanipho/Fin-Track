@@ -133,26 +133,171 @@ FinTrack is a RESTful API that enables users to manage their personal finances t
    - **Swagger UI**: http://localhost:8080/swagger-ui/index.html
    - **Health Check**: http://localhost:8080/actuator/health
 
-### Quick Test with cURL
+### Database Configuration (PostgreSQL)
+The application uses PostgreSQL as the primary database. Configure either via environment variables or directly in `application.properties` for local development:
 
-```bash
-# Create a user account
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "email": "test@example.com",
-    "password": "SecurePassword123!"
-  }'
-
-# Login to get JWT token
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "password": "SecurePassword123!"
-  }'
+Example `src/main/resources/application.properties` entries (if not using env vars):
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/fintrack
+spring.datasource.username=postgres
+spring.datasource.password=password
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+# Optional dev conveniences
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
 ```
+
+To override with environment variables when running:
+```bash
+export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/fintrack
+export SPRING_DATASOURCE_USERNAME=postgres
+export SPRING_DATASOURCE_PASSWORD=password
+```
+
+Test database usage:
+- Use H2 or Testcontainers in tests (planned) while keeping production parity with PostgreSQL.
+
+## 🗄️ Database Schema & Diagrams
+
+The schema is designed for financial integrity, auditability, and performance. Core domains: Users, Accounts, Transactions, Categories, Budgets, and Goals (planned). Budget allocation is normalized via budget line items. Double-entry style consistency is enforced by referencing both source and destination accounts on transfer transactions.
+
+### Entity Relationship (Conceptual)
+```mermaid
+erDiagram
+    USERS ||--o{ ACCOUNTS : "owns"
+    USERS ||--o{ BUDGETS : "defines"
+    USERS ||--o{ GOALS : "sets"
+    ACCOUNTS ||--o{ TRANSACTIONS : "debits"
+    ACCOUNTS ||--o{ TRANSACTIONS : "credits"
+    CATEGORIES ||--o{ TRANSACTIONS : "classifies"
+    BUDGETS ||--o{ BUDGET_LINES : "allocates"
+    CATEGORIES ||--o{ BUDGET_LINES : "budget_for"
+    TRANSACTIONS ||--o{ TRANSACTION_AUDIT : "versioned_by"
+```
+
+### Tables (Planned / In Progress)
+| Table | Purpose | Key Columns | Notes |
+|-------|---------|-------------|-------|
+| users | Authentication & ownership | id (PK), username (UQ), email (UQ), password_hash, role | Soft delete flag optional (is_active) |
+| accounts | Financial containers | id (PK), user_id (FK), name, type, currency, status, opening_balance | Index (user_id,type) |
+| transactions | Monetary movements | id (PK), from_account_id (FK), to_account_id (FK nullable), category_id (FK), amount_minor, currency, type, status, occurred_at | (from_account_id, occurred_at) index; enforce amount > 0 |
+| categories | Classification | id (PK), user_id (nullable FK for custom), code (UQ), name | Seed with system defaults |
+| budgets | Budget headers | id (PK), user_id (FK), period_start, period_end, currency, status | (user_id, period_start, period_end) UQ |
+| budget_lines | Budget allocations | id (PK), budget_id (FK), category_id (FK), limit_minor | (budget_id, category_id) UQ |
+| goals | Financial goals | id (PK), user_id (FK), name, target_amount_minor, current_amount_minor, target_date, status | Progress derived from transactions |
+| transaction_audit | Historical versions | id (PK), transaction_id (FK), version, changed_at, changed_by, diff_json | Backed by Envers or custom |
+
+Minor units (amount_minor) store values as BIGINT to avoid precision errors (e.g., cents). Currency stored as ISO 4217 code (VARCHAR(3)).
+
+### Sample Physical DDL (PostgreSQL-oriented)
+```sql
+CREATE TABLE users (
+  id BIGSERIAL PRIMARY KEY,
+  username VARCHAR(60) NOT NULL UNIQUE,
+  email VARCHAR(120) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(30) NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE accounts (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id),
+  name VARCHAR(80) NOT NULL,
+  type VARCHAR(30) NOT NULL,
+  currency CHAR(3) NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+  opening_balance BIGINT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_accounts_user_type ON accounts(user_id, type);
+
+CREATE TABLE categories (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NULL REFERENCES users(id) ON DELETE CASCADE,
+  code VARCHAR(50) NOT NULL,
+  name VARCHAR(80) NOT NULL,
+  system_default BOOLEAN NOT NULL DEFAULT FALSE,
+  UNIQUE (user_id, code)
+);
+
+CREATE TABLE transactions (
+  id BIGSERIAL PRIMARY KEY,
+  from_account_id BIGINT NOT NULL REFERENCES accounts(id),
+  to_account_id BIGINT NULL REFERENCES accounts(id),
+  category_id BIGINT NULL REFERENCES categories(id),
+  amount_minor BIGINT NOT NULL CHECK (amount_minor > 0),
+  currency CHAR(3) NOT NULL,
+  type VARCHAR(20) NOT NULL, -- INCOME, EXPENSE, TRANSFER
+  status VARCHAR(20) NOT NULL DEFAULT 'COMPLETED',
+  description TEXT NULL,
+  reference VARCHAR(100) NULL,
+  occurred_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_tx_from_time ON transactions(from_account_id, occurred_at);
+CREATE INDEX idx_tx_category_time ON transactions(category_id, occurred_at);
+
+CREATE TABLE budgets (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id),
+  period_start DATE NOT NULL,
+  period_end DATE NOT NULL,
+  currency CHAR(3) NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+  UNIQUE (user_id, period_start, period_end)
+);
+
+CREATE TABLE budget_lines (
+  id BIGSERIAL PRIMARY KEY,
+  budget_id BIGINT NOT NULL REFERENCES budgets(id) ON DELETE CASCADE,
+  category_id BIGINT NOT NULL REFERENCES categories(id),
+  limit_minor BIGINT NOT NULL CHECK (limit_minor >= 0),
+  UNIQUE (budget_id, category_id)
+);
+
+CREATE TABLE goals (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id),
+  name VARCHAR(100) NOT NULL,
+  target_amount_minor BIGINT NOT NULL CHECK (target_amount_minor > 0),
+  current_amount_minor BIGINT NOT NULL DEFAULT 0,
+  target_date DATE NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
+);
+
+CREATE TABLE transaction_audit (
+  id BIGSERIAL PRIMARY KEY,
+  transaction_id BIGINT NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
+  version INT NOT NULL,
+  changed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  changed_by BIGINT NULL REFERENCES users(id),
+  diff_json JSONB NOT NULL,
+  UNIQUE (transaction_id, version)
+);
+```
+
+### Integrity & Business Rules
+- Enforce application-level invariant: for TRANSFER type, both from_account_id AND to_account_id must be present, and currencies must match (or perform FX logic when multi-currency added).
+- Prevent orphan categories by cascading delete only for user-defined categories; system defaults remain global (user_id NULL).
+- Budget overrun detection: SUM(transactions.amount_minor WHERE occurred_at BETWEEN budget period AND category match) > budget_lines.limit_minor triggers alert.
+- Consider partial indexes for active data (e.g., WHERE status = 'ACTIVE').
+
+### Migration Strategy
+- Use Flyway (recommended) with versioned scripts: V1__baseline.sql, V2__add_budgets.sql, etc.
+- Avoid destructive changes; use expand-and-contract pattern for zero-downtime deployments.
+- Add NOT NULL constraints after backfilling data.
+
+### Future Enhancements
+- Partition transactions by month for large-scale datasets.
+- Introduce ledger_entries table for full double-entry accounting.
+- Multi-currency support with fx_rates table and realized/unrealized gain tracking.
+- Materialized views for reporting (monthly_spend_summary, category_trends).
 
 ## 📊 API Documentation
 

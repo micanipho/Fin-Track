@@ -4,22 +4,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
+import za.co.fintrack.FinTrack.enums.BudgetStatus;
 
-@Entity(name = "users")
-public class User{
+import java.time.LocalDate;
+
+@Entity(name = "budgets")
+public class Budget {
+
     @Id
-    @Getter
     private Long id;
     @Getter
-    @Setter
-    private String username;
+    private Long userId;
     @Getter
     @Setter
-    private String email;
+    private LocalDate date;
     @Getter
     @Setter
-    private String password;
-    @Getter
-    @Setter
-    private String role;
+    private BudgetStatus status;
 }

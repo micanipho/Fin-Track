@@ -1,24 +1,89 @@
-# Compiled class file
-*.class
+# ---- Build output ----
+/target/
+/dist/
+/out/
 
-# Log file
+# ---- IDE & Project Files ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+# ---- OS / Misc ----
+.DS_Store
+Thumbs.db
+
+# ---- Logs & Runtime ----
+logs/
 *.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# ---- Temporary Files ----
+*.swp
+*.swo
+*~
+.tmp/
+.tmp
+
+# ---- Environment / Secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Java / JVM ----
+*.class
+
+# ---- Maven ----
+.mvn/wrapper/maven-wrapper.jar
+# (Uncomment above to ignore wrapper JAR; usually you KEEP it tracked.)
+.mvn/timing.properties
+# Dependency caches
+**/dependency-reduced-pom.xml
+
+# ---- Coverage / Reports ----
+/site/
+/coverage/
+/jacoco.exec
+jacoco-report.html
+
+# ---- Generated Sources ----
+/generated/
+**/generated-sources/
+**/generated-test-sources/
+
+# ---- Security / Analysis Tools ----
+/.sonar/
+/sonar-report/
+
+# ---- Docker / Containers ----
+*.pid
+
+# ---- IntelliJ HTTP Client scratch ----
+httpRequests/
+
+# ---- Archives ----
+*.tar
+*.tar.gz
+*.zip
+*.7z
+*.gz
+
+# ---- VS Code (if used) ----
+.vscode/
+
+# ---- Node (if any frontend later) ----
+node_modules/
+
+# ---- Database / Data Dumps ----
+*.sql
+*.db
+
+# Keep example and documentation files
+!README.md
+!ROADMAP.md
+!Sprint1-Acceptance-Criteria.md
+

@@ -5,21 +5,16 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity(name = "users")
-public class User{
+@Entity(name = "catagories")
+public class Catagory {
     @Id
     @Getter
     private Long id;
+    private Long userId;
     @Getter
     @Setter
-    private String username;
+    private String code;
     @Getter
     @Setter
-    private String email;
-    @Getter
-    @Setter
-    private String password;
-    @Getter
-    @Setter
-    private String role;
+    private String name;
 }
