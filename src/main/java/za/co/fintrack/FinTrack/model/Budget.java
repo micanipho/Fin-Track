@@ -14,7 +14,7 @@ public class Budget {
     @Id
     private Long id;
     @Getter
-    private Long userId;
+    private Long user_id;
     @Getter
     @Setter
     private LocalDate date;

@@ -17,7 +17,7 @@ public class Account {
     private Long id;
     @Getter
     @Setter
-    private Long userId;
+    private Long user_id;
     @Getter
     @Setter
     private  String name;

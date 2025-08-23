@@ -5,8 +5,8 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity(name = "catagories")
-public class Catagory {
+@Entity(name = "categories")
+public class Category {
     @Id
     @Getter
     private Long id;
