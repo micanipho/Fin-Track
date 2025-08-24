@@ -1,4 +1,4 @@
-package za.co.fintrack.FinTrack.enums;
+package za.co.fintrack.enums;
 
 public enum GoalStatus {
     ACTIVE,

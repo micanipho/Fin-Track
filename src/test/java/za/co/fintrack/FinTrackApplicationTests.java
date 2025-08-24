@@ -1,4 +1,4 @@
-package za.co.fintrack.FinTrack;
+package za.co.fintrack;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
