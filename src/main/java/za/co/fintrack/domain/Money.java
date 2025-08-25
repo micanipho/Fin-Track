@@ -1,4 +1,4 @@
-package za.co.fintrack.valueObjects;
+package za.co.fintrack.domain;
 
 import lombok.*;
 

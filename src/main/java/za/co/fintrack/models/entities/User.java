@@ -1,4 +1,4 @@
-package za.co.fintrack.model;
+package za.co.fintrack.models.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,5 +33,6 @@ public class User {
     private Role role;
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private boolean active = true;
 }

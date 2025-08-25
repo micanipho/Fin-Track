@@ -1,9 +1,7 @@
-package za.co.fintrack.model;
+package za.co.fintrack.models.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import za.co.fintrack.enums.BudgetStatus;
 
 import java.time.LocalDate;
@@ -12,14 +10,16 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "transaction_audits")
-public class TransactionAudit {
+@Table(name = "budgets")
+public class Budget {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "transaction_id")
-    private Long transactionId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user_id;
 
     @Column(nullable = false)
     private LocalDate date;

@@ -1,6 +1,5 @@
-package za.co.fintrack.model;
+package za.co.fintrack.models.entities;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import za.co.fintrack.enums.TransactionStatus;
