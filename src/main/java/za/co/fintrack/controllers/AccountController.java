@@ -1,6 +1,8 @@
 package za.co.fintrack.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,10 +24,10 @@ public class AccountController {
     }
 
     @PostMapping(path = "/accounts")
-    public AccountDto createAccount(@RequestBody AccountDto accountDto) {
+    public ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto) {
         Account account = accountDtoMapper.mapFrom(accountDto);
         Account savedAccount = accountService.saveAccount(account);
-        return accountDtoMapper.mapTo(savedAccount);
+        return new ResponseEntity<>(accountDtoMapper.mapTo(savedAccount), HttpStatus.CREATED);
     }
 
 }
