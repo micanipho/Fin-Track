@@ -20,6 +20,7 @@ import za.co.fintrack.repositories.UserRepository;
 import java.math.BigDecimal;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -67,5 +68,38 @@ public class AccountControllersTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(accountJson)
         ).andExpect(status().isCreated());
+    }
+
+    @Test
+    void testThatCreatedAccountSuccessfullyReturnsCreatedAccount() throws Exception {
+        User testUser = userRepository.save(
+                User.builder()
+                        .role(Role.USER)
+                        .email("test@email.com")
+                        .username("testUser")
+                        .password("pass")
+                        .build()
+        );
+
+        Account account = Account.builder()
+                .type(AccountType.SAVINGS)
+                .status(AccountStatus.ACTIVE)
+                .user(testUser)
+                .balance(BigDecimal.valueOf(12345))
+                .name("Main")
+                .build();
+
+        String accountJson = objectMapper.writeValueAsString(account);
+
+        mockMvc.perform(
+                post("/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.name").value("Main"))
+                .andExpect(jsonPath("$.type").value("SAVINGS"))
+                .andExpect(jsonPath("$.balance").value(BigDecimal.valueOf(12345)))
+                .andExpect(jsonPath("$.user").value(testUser));
     }
 }
