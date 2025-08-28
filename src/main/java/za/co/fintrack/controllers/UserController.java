@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import za.co.fintrack.mappers.Mapper;
 import za.co.fintrack.models.entities.User;
@@ -12,6 +13,7 @@ import za.co.fintrack.models.dtos.UserDto;
 import za.co.fintrack.services.UserService;
 
 @RestController
+@RequestMapping(path = "api/v1")
 public class UserController {
 
 
@@ -31,4 +33,5 @@ public class UserController {
         User savedUserEntity = userService.saveUser(userEntity);
         return new ResponseEntity<>(userDtoMapper.mapTo(savedUserEntity), HttpStatus.CREATED);
     }
+
 }

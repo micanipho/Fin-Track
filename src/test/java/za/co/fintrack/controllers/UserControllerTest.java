@@ -11,8 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import za.co.fintrack.enums.Role;
+import za.co.fintrack.TestDataCreatorUtil;
 import za.co.fintrack.models.entities.User;
+import za.co.fintrack.services.UserService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,26 +27,23 @@ class UserControllerTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+    private final UserService userService;
 
     @Autowired
-    UserControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
+    UserControllerTest(MockMvc mockMvc, ObjectMapper objectMapper, UserService userService) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
+        this.userService = userService;
     }
 
     @Test
     void testThatRegisteredUserSuccessfullyReturnsHttp201Created() throws Exception {
-        User testUser = User.builder()
-                .role(Role.USER)
-                .email("test@email.com")
-                .username("testUser")
-                .password("pass")
-                .build();
+        User testUser = TestDataCreatorUtil.createTestUser(userService);
 
         String userJson = objectMapper.writeValueAsString(testUser);
 
         mockMvc.perform(
-                post("/register")
+                post("/api/v1/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
         ).andExpect(status().isCreated());
@@ -53,17 +51,12 @@ class UserControllerTest {
 
     @Test
     void testThatRegisteredUserSuccessfullyReturnsSavedUser() throws Exception {
-        User testUser = User.builder()
-                .role(Role.USER)
-                .email("test@email.com")
-                .username("testUser")
-                .password("pass")
-                .build();
+        User testUser = TestDataCreatorUtil.createTestUser(userService);
 
         String userJson = objectMapper.writeValueAsString(testUser);
 
         mockMvc.perform(
-                post("/register")
+                post("/api/v1/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
         ).andExpect(jsonPath("$.id").isNumber())
