@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
-public class AccountControllersTest {
+public class AccountControllersIntegrationTests {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
@@ -34,8 +34,8 @@ public class AccountControllersTest {
     private final AccountService accountService;
 
     @Autowired
-    public AccountControllersTest(MockMvc mockMvc,
-                                  ObjectMapper objectMapper, UserService userService, AccountService accountService) {
+    public AccountControllersIntegrationTests(MockMvc mockMvc,
+                                              ObjectMapper objectMapper, UserService userService, AccountService accountService) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
         this.userService = userService;
@@ -144,6 +144,110 @@ public class AccountControllersTest {
                 .andExpect(jsonPath("$.name").value("Main"))
                 .andExpect(jsonPath("$.type").value("SAVINGS"))
                 .andExpect(jsonPath("$.balance").exists())
+                .andExpect(jsonPath("$.user").value(testUser));
+    }
+
+    @Test
+    void testThatDeleteAccountsReturnsHttpStatus204WhenItExists() throws Exception {
+
+        User testUser = TestDataCreatorUtil.createTestUser(userService);
+
+        accountService.saveAccount(TestDataCreatorUtil.createTestAccount(testUser));
+
+        mockMvc.perform(
+                delete("/api/v1/accounts/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testThatDeleteAccountsReturnsHttpStatus404WhenItDoesNotExists() throws Exception {
+
+        mockMvc.perform(
+                delete("/api/v1/accounts/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testThatUpdatingAccountSuccessfullyReturnsHttp404WhenUserDoesNotExist() throws Exception {
+
+
+        User testUser = TestDataCreatorUtil.createTestUser(userService);
+
+        Account account = accountService.saveAccount(TestDataCreatorUtil.createTestAccount(testUser));
+
+        String accountJson = objectMapper.writeValueAsString(account);
+
+        mockMvc.perform(
+                put("/api/v1/accounts/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testThatUpdatingAccountSuccessfullyReturnsHttp400WhenMissingBody() throws Exception {
+
+
+        mockMvc.perform(
+                put("/api/v1/accounts/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testThatUpdatingAccountSuccessfullyReturnsHttp200WhenUpdated() throws Exception {
+
+
+        User testUser = TestDataCreatorUtil.createTestUser(userService);
+
+        Account account = accountService.saveAccount(TestDataCreatorUtil.createTestAccount(testUser));
+
+        String accountJson = objectMapper.writeValueAsString(account);
+
+        mockMvc.perform(
+                put("/api/v1/accounts/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    void testThatUpdatingAccountSuccessfullyReturnsCorrectUpdatedAccount() throws Exception {
+
+
+        User testUser = TestDataCreatorUtil.createTestUser(userService);
+
+        Account account = TestDataCreatorUtil.createTestAccount(testUser);
+
+        String accountJson = objectMapper.writeValueAsString(account);
+
+        mockMvc.perform(
+                post("/api/v1/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(status().isCreated());
+
+        Account updatedAccount = new Account();
+        updatedAccount.setId(account.getId());
+        updatedAccount.setName("Updated Name");
+        updatedAccount.setBalance(BigDecimal.valueOf(1234));
+        updatedAccount.setType(account.getType());
+        updatedAccount.setUser(testUser);
+        updatedAccount.setStatus(account.getStatus());
+
+        String updatedAccountJson = objectMapper.writeValueAsString(updatedAccount);
+
+        mockMvc.perform(
+                put("/api/v1/accounts/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updatedAccountJson)
+        ).andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.name").value("Updated Name"))
+                .andExpect(jsonPath("$.type").value("SAVINGS"))
+                .andExpect(jsonPath("$.balance").value(BigDecimal.valueOf(1234)))
                 .andExpect(jsonPath("$.user").value(testUser));
     }
 }

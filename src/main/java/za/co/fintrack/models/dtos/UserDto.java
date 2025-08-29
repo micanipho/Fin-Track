@@ -17,5 +17,6 @@ public class UserDto {
     private String email;
     private String password;
     private Role role;
+    @Builder.Default
     private boolean active = true;
 }

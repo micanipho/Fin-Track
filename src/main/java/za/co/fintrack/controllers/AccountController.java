@@ -11,7 +11,6 @@ import za.co.fintrack.services.AccountService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @RestController
@@ -49,5 +48,25 @@ public class AccountController {
             AccountDto accountDto = accountDtoMapper.mapTo(account1);
             return new  ResponseEntity<>(accountDto, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<AccountDto> deleteAccountById(@PathVariable Long id){
+        if (!accountService.isExists(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        accountService.deleteById(id);
+        return  new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping(path = "/{id}")
+    public  ResponseEntity<AccountDto> updateAccountById(@PathVariable Long id,
+                                                         @RequestBody AccountDto accountDto){
+        if(!accountService.isExists(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        accountDto.setId(id);
+        Account updatedAccount = accountService.saveAccount(accountDtoMapper.mapFrom(accountDto));
+        return new ResponseEntity<>(accountDtoMapper.mapTo(updatedAccount), HttpStatus.OK);
     }
 }

@@ -36,4 +36,14 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.findById(id);
     }
 
+    @Override
+    public void deleteById(Long id) {
+        accountRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean isExists(Long id) {
+        return accountRepository.existsById(id);
+    }
+
 }
