@@ -60,7 +60,7 @@ public class AccountController {
     }
 
     @PutMapping(path = "/{id}")
-    public  ResponseEntity<AccountDto> updateAccountById(@PathVariable Long id,
+    public  ResponseEntity<AccountDto> updateAccount(@PathVariable Long id,
                                                          @RequestBody AccountDto accountDto){
         if(!accountService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -68,5 +68,18 @@ public class AccountController {
         accountDto.setId(id);
         Account updatedAccount = accountService.saveAccount(accountDtoMapper.mapFrom(accountDto));
         return new ResponseEntity<>(accountDtoMapper.mapTo(updatedAccount), HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/{id}")
+    public ResponseEntity<AccountDto> partialUpdate(
+            @PathVariable Long id,
+            @RequestBody AccountDto accountDto
+    ){
+        if (!accountService.isExists(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Account account = accountDtoMapper.mapFrom(accountDto);
+        Account updatedAccount = accountService.partialUpdate(id, account);
+        return new  ResponseEntity<>(accountDtoMapper.mapTo(updatedAccount), HttpStatus.OK);
     }
 }

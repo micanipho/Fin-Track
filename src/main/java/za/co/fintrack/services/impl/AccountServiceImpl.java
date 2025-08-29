@@ -46,4 +46,19 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.existsById(id);
     }
 
+    @Override
+    public Account partialUpdate(Long id, Account account) {
+        account.setId(id);
+
+        return accountRepository.findById(id).map(existingAccount -> {
+            Optional.ofNullable(account.getType()).ifPresent(existingAccount::setType);
+            Optional.ofNullable(account.getStatus()).ifPresent(existingAccount::setStatus);
+            Optional.ofNullable(account.getUser()).ifPresent(existingAccount::setUser);
+            Optional.ofNullable(account.getBalance()).ifPresent(existingAccount::setBalance);
+            Optional.ofNullable(account.getName()).ifPresent(existingAccount::setName);
+
+            accountRepository.save(existingAccount);
+            return  existingAccount;
+        }).orElseThrow(() -> new RuntimeException("Account does not exist"));
+    }
 }

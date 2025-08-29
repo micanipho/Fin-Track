@@ -219,15 +219,7 @@ public class AccountControllersIntegrationTests {
 
         User testUser = TestDataCreatorUtil.createTestUser(userService);
 
-        Account account = TestDataCreatorUtil.createTestAccount(testUser);
-
-        String accountJson = objectMapper.writeValueAsString(account);
-
-        mockMvc.perform(
-                post("/api/v1/accounts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(accountJson)
-        ).andExpect(status().isCreated());
+        Account account = accountService.saveAccount(TestDataCreatorUtil.createTestAccount(testUser));
 
         Account updatedAccount = new Account();
         updatedAccount.setId(account.getId());
@@ -246,6 +238,64 @@ public class AccountControllersIntegrationTests {
         ).andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.name").value("Updated Name"))
+                .andExpect(jsonPath("$.type").value("SAVINGS"))
+                .andExpect(jsonPath("$.balance").value(BigDecimal.valueOf(1234)))
+                .andExpect(jsonPath("$.user").value(testUser));
+    }
+
+    @Test
+    void testThatPartiallyUpdatingAccountSuccessfullyReturnsHttp404WhenUserDoesNotExist() throws Exception {
+
+
+        User testUser = TestDataCreatorUtil.createTestUser(userService);
+
+        Account account = accountService.saveAccount(TestDataCreatorUtil.createTestAccount(testUser));
+
+        String accountJson = objectMapper.writeValueAsString(account);
+
+        mockMvc.perform(
+                patch("/api/v1/accounts/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testThatPartiallyUpdatingAccountSuccessfullyReturnsHttp200WhenUpdated() throws Exception {
+
+
+        User testUser = TestDataCreatorUtil.createTestUser(userService);
+
+        Account account = accountService.saveAccount(TestDataCreatorUtil.createTestAccount(testUser));
+
+        String accountJson = objectMapper.writeValueAsString(account);
+
+        mockMvc.perform(
+                patch("/api/v1/accounts/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    void testThatPartiallyUpdatingAccountSuccessfullyReturnsCorrectUpdatedAccount() throws Exception {
+
+        User testUser = TestDataCreatorUtil.createTestUser(userService);
+
+        accountService.saveAccount(TestDataCreatorUtil.createTestAccount(testUser));
+
+        Account updatedAccount = new Account();
+        updatedAccount.setName("Changed Name");
+        updatedAccount.setBalance(BigDecimal.valueOf(1234));
+        String updatedAccountJson = objectMapper.writeValueAsString(updatedAccount);
+
+        mockMvc.perform(
+                        patch("/api/v1/accounts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(updatedAccountJson)
+                ).andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.name").value("Changed Name"))
                 .andExpect(jsonPath("$.type").value("SAVINGS"))
                 .andExpect(jsonPath("$.balance").value(BigDecimal.valueOf(1234)))
                 .andExpect(jsonPath("$.user").value(testUser));

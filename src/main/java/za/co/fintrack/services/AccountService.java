@@ -16,4 +16,6 @@ public interface AccountService {
     void deleteById(Long id);
 
     boolean isExists(Long id);
+
+    Account partialUpdate(Long id, Account account);
 }
