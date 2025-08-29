@@ -186,6 +186,21 @@ public class AccountControllersIntegrationTests {
         ).andExpect(status().isNotFound());
     }
 
+    private Account createAndSaveTestAccount(User testUser) {
+        return accountService.saveAccount(TestDataCreatorUtil.createTestAccount(testUser));
+    }
+
+    private Account createUpdatedAccount(Account account, User testUser) {
+        Account updatedAccount = new Account();
+        updatedAccount.setId(account.getId());
+        updatedAccount.setName("Updated Name");
+        updatedAccount.setBalance(BigDecimal.valueOf(1234));
+        updatedAccount.setType(account.getType());
+        updatedAccount.setUser(testUser);
+        updatedAccount.setStatus(account.getStatus());
+        return updatedAccount;
+    }
+
     @Test
     void testThatUpdatingAccountSuccessfullyReturnsHttp400WhenMissingBody() throws Exception {
 
@@ -202,7 +217,7 @@ public class AccountControllersIntegrationTests {
 
         User testUser = TestDataCreatorUtil.createTestUser(userService);
 
-        Account account = accountService.saveAccount(TestDataCreatorUtil.createTestAccount(testUser));
+        Account account = createAndSaveTestAccount(testUser);
 
         String accountJson = objectMapper.writeValueAsString(account);
 
@@ -219,15 +234,9 @@ public class AccountControllersIntegrationTests {
 
         User testUser = TestDataCreatorUtil.createTestUser(userService);
 
-        Account account = accountService.saveAccount(TestDataCreatorUtil.createTestAccount(testUser));
+        Account account = createAndSaveTestAccount(testUser);
 
-        Account updatedAccount = new Account();
-        updatedAccount.setId(account.getId());
-        updatedAccount.setName("Updated Name");
-        updatedAccount.setBalance(BigDecimal.valueOf(1234));
-        updatedAccount.setType(account.getType());
-        updatedAccount.setUser(testUser);
-        updatedAccount.setStatus(account.getStatus());
+        Account updatedAccount = createUpdatedAccount(account, testUser);
 
         String updatedAccountJson = objectMapper.writeValueAsString(updatedAccount);
 
@@ -301,3 +310,4 @@ public class AccountControllersIntegrationTests {
                 .andExpect(jsonPath("$.user").value(testUser));
     }
 }
+
