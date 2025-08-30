@@ -1,5 +1,7 @@
 package za.co.fintrack.services;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import za.co.fintrack.models.entities.Account;
 
 import java.util.List;
@@ -10,6 +12,8 @@ public interface AccountService {
     Account saveAccount(Account account);
 
     List<Account> findAll();
+
+    Page<Account> findAll(Pageable pageable);
 
     Optional<Account> findById(Long id);
 

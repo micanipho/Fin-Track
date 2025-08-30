@@ -1,5 +1,7 @@
 package za.co.fintrack.services.impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import za.co.fintrack.models.entities.Account;
 import za.co.fintrack.repositories.AccountRepository;
@@ -8,9 +10,6 @@ import za.co.fintrack.services.AccountService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -32,6 +31,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Page<Account> findAll(Pageable pageable) {
+        return accountRepository.findAll(pageable);
+    }
+
+    @Override
     public Optional<Account> findById(Long id) {
         return accountRepository.findById(id);
     }
@@ -43,7 +47,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean isExists(Long id) {
-        return accountRepository.existsById(id);
+        return !accountRepository.existsById(id);
     }
 
     @Override

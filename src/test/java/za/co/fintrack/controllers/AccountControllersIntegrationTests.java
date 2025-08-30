@@ -100,12 +100,16 @@ public class AccountControllersIntegrationTests {
         mockMvc.perform(
                 get("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(jsonPath("$[0].id").isNumber())
-                .andExpect(jsonPath("$[0].status").value("ACTIVE"))
-                .andExpect(jsonPath("$[0].name").value("Main"))
-                .andExpect(jsonPath("$[0].type").value("SAVINGS"))
-                .andExpect(jsonPath("$[0].balance").exists())
-                .andExpect(jsonPath("$[0].user").value(testUser));
+        ).andExpect(jsonPath("$.content[0].id").isNumber())
+                .andExpect(jsonPath("$.content[0].status").value("ACTIVE"))
+                .andExpect(jsonPath("$.content[0].name").value("Main"))
+                .andExpect(jsonPath("$.content[0].type").value("SAVINGS"))
+                .andExpect(jsonPath("$.content[0].balance").exists())
+                .andExpect(jsonPath("$.content[0].user.id").value(testUser.getId()))
+                .andExpect(jsonPath("$.content[0].user.username").value(testUser.getUsername()))
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.number").value(0));
     }
 
     @Test

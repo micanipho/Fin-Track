@@ -1,6 +1,8 @@
 package za.co.fintrack.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,11 +36,9 @@ public class AccountController {
     }
 
     @GetMapping
-    public List<AccountDto> getAllAccounts(){
-        List<Account> accounts = accountService.findAll();
-        return accounts.stream()
-                .map(accountDtoMapper::mapTo)
-                .collect(Collectors.toList());
+    public Page<AccountDto> getAllAccounts(Pageable pageable){
+        Page<Account> accounts = accountService.findAll(pageable);
+        return accounts.map(accountDtoMapper::mapTo);
     }
 
     @GetMapping(path = "/{id}")
@@ -52,7 +52,7 @@ public class AccountController {
 
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<AccountDto> deleteAccountById(@PathVariable Long id){
-        if (!accountService.isExists(id)) {
+        if (accountService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         accountService.deleteById(id);
@@ -62,7 +62,7 @@ public class AccountController {
     @PutMapping(path = "/{id}")
     public  ResponseEntity<AccountDto> updateAccount(@PathVariable Long id,
                                                          @RequestBody AccountDto accountDto){
-        if(!accountService.isExists(id)) {
+        if(accountService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         accountDto.setId(id);
@@ -75,7 +75,7 @@ public class AccountController {
             @PathVariable Long id,
             @RequestBody AccountDto accountDto
     ){
-        if (!accountService.isExists(id)) {
+        if (accountService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Account account = accountDtoMapper.mapFrom(accountDto);
