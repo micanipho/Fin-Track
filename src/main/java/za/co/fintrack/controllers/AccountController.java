@@ -11,9 +11,7 @@ import za.co.fintrack.models.dtos.AccountDto;
 import za.co.fintrack.models.entities.Account;
 import za.co.fintrack.services.AccountService;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "api/v1/accounts")

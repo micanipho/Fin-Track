@@ -13,7 +13,7 @@ import za.co.fintrack.models.dtos.UserDto;
 import za.co.fintrack.services.UserService;
 
 @RestController
-@RequestMapping(path = "api/v1")
+@RequestMapping(path = "api/v1/auth")
 public class UserController {
 
 

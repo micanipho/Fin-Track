@@ -43,7 +43,7 @@ class UserControllerIntegrationTests {
         String userJson = objectMapper.writeValueAsString(testUser);
 
         mockMvc.perform(
-                post("/api/v1/register")
+                post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
         ).andExpect(status().isCreated());
@@ -56,7 +56,7 @@ class UserControllerIntegrationTests {
         String userJson = objectMapper.writeValueAsString(testUser);
 
         mockMvc.perform(
-                post("/api/v1/register")
+                post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
         ).andExpect(jsonPath("$.id").isNumber())
