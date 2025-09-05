@@ -3,8 +3,12 @@ package za.co.fintrack.models.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import za.co.fintrack.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-/**
+import java.util.ArrayList;
+import java.util.List;
+
+/**aaa
  * Represents a user in the system.
  */
 @Data
@@ -35,4 +39,8 @@ public class User {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean active = true;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @JsonIgnore
+    private List<Account> accounts = new ArrayList<>();
 }

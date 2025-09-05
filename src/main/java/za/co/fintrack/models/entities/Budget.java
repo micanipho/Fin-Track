@@ -19,7 +19,7 @@ public class Budget {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user_id;
+    private User user;
 
     @Column(nullable = false)
     private LocalDate date;

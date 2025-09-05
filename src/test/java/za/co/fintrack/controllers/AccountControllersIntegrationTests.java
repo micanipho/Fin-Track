@@ -78,7 +78,11 @@ public class AccountControllersIntegrationTests {
                 .andExpect(jsonPath("$.name").value("Main"))
                 .andExpect(jsonPath("$.type").value("SAVINGS"))
                 .andExpect(jsonPath("$.balance").value(BigDecimal.valueOf(12345)))
-                .andExpect(jsonPath("$.user").value(testUser));
+                .andExpect(jsonPath("$.user.id").value(testUser.getId()))
+                .andExpect(jsonPath("$.user.username").value(testUser.getUsername()))
+                .andExpect(jsonPath("$.user.email").value(testUser.getEmail()))
+                .andExpect(jsonPath("$.user.role").value(testUser.getRole().toString()))
+                .andExpect(jsonPath("$.user.active").value(testUser.isActive()));
     }
 
     @Test
@@ -148,7 +152,11 @@ public class AccountControllersIntegrationTests {
                 .andExpect(jsonPath("$.name").value("Main"))
                 .andExpect(jsonPath("$.type").value("SAVINGS"))
                 .andExpect(jsonPath("$.balance").exists())
-                .andExpect(jsonPath("$.user").value(testUser));
+                .andExpect(jsonPath("$.user.id").value(testUser.getId()))
+                .andExpect(jsonPath("$.user.username").value(testUser.getUsername()))
+                .andExpect(jsonPath("$.user.email").value(testUser.getEmail()))
+                .andExpect(jsonPath("$.user.role").value(testUser.getRole().toString()))
+                .andExpect(jsonPath("$.user.active").value(testUser.isActive()));
     }
 
     @Test
@@ -253,7 +261,11 @@ public class AccountControllersIntegrationTests {
                 .andExpect(jsonPath("$.name").value("Updated Name"))
                 .andExpect(jsonPath("$.type").value("SAVINGS"))
                 .andExpect(jsonPath("$.balance").value(BigDecimal.valueOf(1234)))
-                .andExpect(jsonPath("$.user").value(testUser));
+                .andExpect(jsonPath("$.user.id").value(testUser.getId()))
+                .andExpect(jsonPath("$.user.username").value(testUser.getUsername()))
+                .andExpect(jsonPath("$.user.email").value(testUser.getEmail()))
+                .andExpect(jsonPath("$.user.role").value(testUser.getRole().toString()))
+                .andExpect(jsonPath("$.user.active").value(testUser.isActive()));
     }
 
     @Test
@@ -311,7 +323,10 @@ public class AccountControllersIntegrationTests {
                 .andExpect(jsonPath("$.name").value("Changed Name"))
                 .andExpect(jsonPath("$.type").value("SAVINGS"))
                 .andExpect(jsonPath("$.balance").value(BigDecimal.valueOf(1234)))
-                .andExpect(jsonPath("$.user").value(testUser));
+                .andExpect(jsonPath("$.user.id").value(testUser.getId()))
+                .andExpect(jsonPath("$.user.username").value(testUser.getUsername()))
+                .andExpect(jsonPath("$.user.email").value(testUser.getEmail()))
+                .andExpect(jsonPath("$.user.role").value(testUser.getRole().toString()))
+                .andExpect(jsonPath("$.user.active").value(testUser.isActive()));
     }
 }
-
