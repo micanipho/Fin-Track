@@ -40,7 +40,8 @@ public class User {
     @Builder.Default
     private boolean active = true;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
+    @Builder.Default
     private List<Account> accounts = new ArrayList<>();
 }
