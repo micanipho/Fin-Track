@@ -25,6 +25,6 @@ public class TransactionAudit {
     private LocalDate date;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "budget_status", nullable = false)
     private BudgetStatus status;
 }
