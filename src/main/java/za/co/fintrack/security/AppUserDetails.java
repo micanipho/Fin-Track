@@ -51,5 +51,9 @@ public class AppUserDetails implements UserDetails {
     public boolean isEnabled() {
         return  true;
     }
+
+    public Object getId() {
+        return  user.getId();
+    }
 }
 
