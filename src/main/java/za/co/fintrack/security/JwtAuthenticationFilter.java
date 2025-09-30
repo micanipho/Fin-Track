@@ -35,9 +35,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             // Do not throw exception just don't authenticate
-            logger.warn("Recieved incorrect token.\n" + e.getMessage());
+            logger.warn("Received incorrect token.\n" + e.getMessage());
         }
 
+        // CRITICAL: Always continue the filter chain
+        filterChain.doFilter(request, response);
     }
 
     private String extractToken(HttpServletRequest request){
