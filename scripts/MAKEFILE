@@ -1,0 +1,2 @@
+stop-postgres:
+	systemctl stop postgresql

@@ -9,7 +9,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import za.co.fintrack.mappers.Mapper;
+import za.co.fintrack.models.dtos.UserDto;
+import za.co.fintrack.models.entities.User;
 import za.co.fintrack.services.AuthenticationService;
+import za.co.fintrack.services.UserService;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -21,26 +25,31 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private  final UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
     private final AuthenticationManager authenticationManager;
+    private final Mapper<User, UserDto> mapper;
+    private final UserServiceImpl userService;
 
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private final Long jwtExpiryMs = 8640000L;
-
     @Override
     public UserDetails authenticate(String username, String password) {
+        assert authenticationManager != null;
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)
         );
+        assert userDetailsService != null;
         return userDetailsService.loadUserByUsername(username);
     }
+
+
 
     @Override
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
 
+        long jwtExpiryMs = 8640000L;
         return Jwts.builder()
                 .claims(claims)
                 .subject(userDetails.getUsername())
@@ -53,7 +62,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public UserDetails validateToken(String token) {
         String userName = extractUserName(token);
+        assert userDetailsService != null;
         return userDetailsService.loadUserByUsername(userName);
+    }
+
+    @Override
+    public UserDto register(UserDto userDto) {
+
+        User userToSave = mapper.mapFrom(userDto);
+        User savedUser = userService.saveUser(userToSave);
+        return mapper.mapTo(savedUser);
     }
 
     private String extractUserName(String token) {

@@ -34,7 +34,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth", "/api/v1/auth/register").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/accounts/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/accounts/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/api/v1/accounts/**").permitAll()
