@@ -74,9 +74,9 @@ public class AuthController {
             // Register the user
             UserDto registeredUser = authenticationService.register(userDto);
 
-            // Authenticate the newly registered user
+            // Authenticate the newly registered user using email (not username)
             UserDetails userDetails = authenticationService.authenticate(
-                    registeredUser.getUsername(),
+                    registeredUser.getEmail(),
                     signUpRequest.getPassword()
             );
 

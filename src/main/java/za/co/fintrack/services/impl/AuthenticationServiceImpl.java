@@ -8,7 +8,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import za.co.fintrack.enums.Role;
 import za.co.fintrack.mappers.Mapper;
 import za.co.fintrack.models.dtos.UserDto;
 import za.co.fintrack.models.entities.User;
@@ -29,6 +31,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final Mapper<User, UserDto> mapper;
     private final UserServiceImpl userService;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -70,6 +73,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public UserDto register(UserDto userDto) {
 
         User userToSave = mapper.mapFrom(userDto);
+        // Set default role if not set
+        if (userToSave.getRole() == null) {
+            userToSave.setRole(Role.USER);
+        }
+        // Encode password
+        userToSave.setPassword(passwordEncoder.encode(userToSave.getPassword()));
         User savedUser = userService.saveUser(userToSave);
         return mapper.mapTo(savedUser);
     }
