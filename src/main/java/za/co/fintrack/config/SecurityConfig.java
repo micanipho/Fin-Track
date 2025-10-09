@@ -34,6 +34,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http.authorizeHttpRequests(auth -> auth
+                // OpenAPI and Swagger UI endpoints - MUST be first to take precedence
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/api-docs/**").permitAll()
+                .requestMatchers("/api-docs").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/swagger-resources/**").permitAll()
+                .requestMatchers("/webjars/**").permitAll()
+                // Actuator endpoints
+                .requestMatchers("/actuator/**").permitAll()
                 // Sprint 2 authentication endpoints - permit all
                 .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auth/verify-email").permitAll()
