@@ -34,12 +34,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http.authorizeHttpRequests(auth -> auth
+                // Sprint 2 authentication endpoints - permit all
+                .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/auth/verify-email").permitAll()
+                // Legacy endpoints for backward compatibility
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth", "/api/v1/auth/register").permitAll()
+                // Account endpoints - permit all for testing (should be secured in production)
                 .requestMatchers(HttpMethod.GET, "/api/v1/accounts/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/accounts/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT,"/api/v1/accounts/**").permitAll()
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/accounts/**").permitAll()
-                        .requestMatchers(HttpMethod.PATCH,"/api/v1/accounts/**").permitAll()
+                .requestMatchers(HttpMethod.POST,"/api/v1/accounts/**").permitAll()
+                .requestMatchers(HttpMethod.PUT,"/api/v1/accounts/**").permitAll()
+                .requestMatchers(HttpMethod.DELETE,"/api/v1/accounts/**").permitAll()
+                .requestMatchers(HttpMethod.PATCH,"/api/v1/accounts/**").permitAll()
                 .anyRequest().authenticated()
         )
                 .csrf(AbstractHttpConfigurer::disable)

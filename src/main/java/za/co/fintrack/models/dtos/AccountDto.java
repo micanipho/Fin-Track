@@ -1,13 +1,11 @@
 package za.co.fintrack.models.dtos;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import za.co.fintrack.enums.AccountStatus;
 import za.co.fintrack.enums.AccountType;
-import za.co.fintrack.models.entities.User;
 
 import java.math.BigDecimal;
 
@@ -18,9 +16,12 @@ import java.math.BigDecimal;
 public class AccountDto {
 
     private Long id;
-    private User user;
+    private Long userId; // Changed from User entity to just user ID
     private String name;
     private AccountType type;
     private AccountStatus status;
     private BigDecimal balance;
+
+    // Optional: Include user details for response
+    private UserDto user;
 }

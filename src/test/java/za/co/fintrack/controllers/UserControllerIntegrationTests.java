@@ -7,13 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import za.co.fintrack.TestDataCreatorUtil;
-import za.co.fintrack.models.entities.User;
-import za.co.fintrack.services.UserService;
+import za.co.fintrack.auth.SignUpRequest;
+import za.co.fintrack.config.TestEmailConfig;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,27 +23,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
+@Import(TestEmailConfig.class)
 class UserControllerIntegrationTests {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
-    private final UserService userService;
 
     @Autowired
-    UserControllerIntegrationTests(MockMvc mockMvc, ObjectMapper objectMapper, UserService userService) {
+    UserControllerIntegrationTests(MockMvc mockMvc, ObjectMapper objectMapper) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
-        this.userService = userService;
     }
 
     @Test
     void testThatRegisteredUserSuccessfullyReturnsHttp201Created() throws Exception {
-        User testUser = TestDataCreatorUtil.createTestUser(userService);
+        SignUpRequest signUpRequest = SignUpRequest.builder()
+                .username("testUser")
+                .email("test@email.com")
+                .password("MyStr0ng!T3st123")
+                .confirmPassword("MyStr0ng!T3st123")
+                .build();
 
-        String userJson = objectMapper.writeValueAsString(testUser);
+        String userJson = objectMapper.writeValueAsString(signUpRequest);
 
         mockMvc.perform(
-                post("/api/v1/auth/register")
+                post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
         ).andExpect(status().isCreated());
@@ -51,18 +55,20 @@ class UserControllerIntegrationTests {
 
     @Test
     void testThatRegisteredUserSuccessfullyReturnsSavedUser() throws Exception {
-        User testUser = TestDataCreatorUtil.createTestUser(userService);
+        SignUpRequest signUpRequest = SignUpRequest.builder()
+                .username("testUser")
+                .email("test@email.com")
+                .password("MyStr0ng!T3st123")
+                .confirmPassword("MyStr0ng!T3st123")
+                .build();
 
-        String userJson = objectMapper.writeValueAsString(testUser);
+        String userJson = objectMapper.writeValueAsString(signUpRequest);
 
         mockMvc.perform(
-                post("/api/v1/auth/register")
+                post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
-        ).andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.email").value("test@email.com"))
-                .andExpect(jsonPath("$.username").value("testUser"))
-                .andExpect(jsonPath("$.password").value("pass"))
-                .andExpect(jsonPath("$.role").value("USER"));
+        ).andExpect(jsonPath("$.userId").isNumber())
+                .andExpect(jsonPath("$.message").value("Registration successful. Please check your email to verify your account."));
     }
 }

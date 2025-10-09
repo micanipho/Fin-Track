@@ -7,6 +7,10 @@ public interface AuthenticationService {
 
     UserDetails authenticate(String username, String password);
     String generateToken(UserDetails userDetails);
+    String generateRefreshToken(UserDetails userDetails);
     UserDetails validateToken(String token);
+    UserDetails refreshToken(String refreshToken);
     UserDto register(UserDto userDto);
+    void logout(String token);
+    boolean isTokenBlacklisted(String token);
 }

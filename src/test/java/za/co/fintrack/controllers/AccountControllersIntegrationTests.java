@@ -11,6 +11,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import za.co.fintrack.TestDataCreatorUtil;
+import za.co.fintrack.models.dtos.AccountDto;
 import za.co.fintrack.models.entities.Account;
 import za.co.fintrack.models.entities.User;
 import za.co.fintrack.services.AccountService;
@@ -46,11 +47,11 @@ public class AccountControllersIntegrationTests {
     @Test
     void testThatCreatedAccountSuccessfullyReturnsHttp201Created() throws Exception {
 
-        User testUser = TestDataCreatorUtil.createTestUser(userService);
+        User testUser = userService.saveUser(TestDataCreatorUtil.createTestUser(userService));
 
-        Account account = TestDataCreatorUtil.createTestAccount(testUser);
+        AccountDto accountDto = TestDataCreatorUtil.createTestAccountDto(testUser);
 
-        String accountJson = objectMapper.writeValueAsString(account);
+        String accountJson = objectMapper.writeValueAsString(accountDto);
 
         mockMvc.perform(
                 post("/api/v1/accounts")
@@ -64,10 +65,9 @@ public class AccountControllersIntegrationTests {
 
         User testUser = userService.saveUser(TestDataCreatorUtil.createTestUser(userService));
 
-        Account account = TestDataCreatorUtil.createTestAccount(testUser);
+        AccountDto accountDto = TestDataCreatorUtil.createTestAccountDto(testUser);
 
-
-        String accountJson = objectMapper.writeValueAsString(account);
+        String accountJson = objectMapper.writeValueAsString(accountDto);
 
         mockMvc.perform(
                 post("/api/v1/accounts")
@@ -78,6 +78,7 @@ public class AccountControllersIntegrationTests {
                 .andExpect(jsonPath("$.name").value("Main"))
                 .andExpect(jsonPath("$.type").value("SAVINGS"))
                 .andExpect(jsonPath("$.balance").value(BigDecimal.valueOf(12345)))
+                .andExpect(jsonPath("$.userId").value(testUser.getId()))
                 .andExpect(jsonPath("$.user.id").value(testUser.getId()))
                 .andExpect(jsonPath("$.user.username").value(testUser.getUsername()))
                 .andExpect(jsonPath("$.user.email").value(testUser.getEmail()))

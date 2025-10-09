@@ -40,31 +40,45 @@ public class AccountController {
     }
 
     @GetMapping(path = "/{id}")
-    public  ResponseEntity<AccountDto> getAccountById(@PathVariable Long id){
+    public ResponseEntity<AccountDto> getAccountById(@PathVariable Long id){
         Optional<Account> account = accountService.findById(id);
         return account.map(account1 -> {
             AccountDto accountDto = accountDtoMapper.mapTo(account1);
-            return new  ResponseEntity<>(accountDto, HttpStatus.OK);
+            return new ResponseEntity<>(accountDto, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<AccountDto> deleteAccountById(@PathVariable Long id){
-        if (accountService.isExists(id)) {
+        if (!accountService.isExists(id)) { // Fixed: inverted logic
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         accountService.deleteById(id);
-        return  new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping(path = "/{id}")
-    public  ResponseEntity<AccountDto> updateAccount(@PathVariable Long id,
+    public ResponseEntity<AccountDto> updateAccount(@PathVariable Long id,
                                                          @RequestBody AccountDto accountDto){
-        if(accountService.isExists(id)) {
+        if(!accountService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        // Get the existing account to preserve the user association
+        Optional<Account> existingAccountOpt = accountService.findById(id);
+        if (existingAccountOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         accountDto.setId(id);
-        Account updatedAccount = accountService.saveAccount(accountDtoMapper.mapFrom(accountDto));
+        Account accountToUpdate = accountDtoMapper.mapFrom(accountDto);
+
+        // If user is null in the mapped account, preserve the existing user
+        if (accountToUpdate.getUser() == null) {
+            accountToUpdate.setUser(existingAccountOpt.get().getUser());
+        }
+
+        Account updatedAccount = accountService.saveAccount(accountToUpdate);
         return new ResponseEntity<>(accountDtoMapper.mapTo(updatedAccount), HttpStatus.OK);
     }
 
@@ -73,11 +87,11 @@ public class AccountController {
             @PathVariable Long id,
             @RequestBody AccountDto accountDto
     ){
-        if (accountService.isExists(id)) {
+        if (!accountService.isExists(id)) { // Fixed: inverted logic
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Account account = accountDtoMapper.mapFrom(accountDto);
         Account updatedAccount = accountService.partialUpdate(id, account);
-        return new  ResponseEntity<>(accountDtoMapper.mapTo(updatedAccount), HttpStatus.OK);
+        return new ResponseEntity<>(accountDtoMapper.mapTo(updatedAccount), HttpStatus.OK);
     }
 }

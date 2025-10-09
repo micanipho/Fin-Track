@@ -2,6 +2,7 @@ package za.co.fintrack.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -13,6 +14,9 @@ public class JacksonConfig {
     @Primary
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
+
+        // Register JSR310 module for Java 8 time types
+        mapper.registerModule(new JavaTimeModule());
 
         // Register Hibernate6 module to handle lazy loading proxies
         Hibernate6Module hibernate6Module = new Hibernate6Module();

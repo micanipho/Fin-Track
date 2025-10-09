@@ -47,7 +47,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean isExists(Long id) {
-        return !accountRepository.existsById(id);
+        return accountRepository.existsById(id);
     }
 
     @Override
