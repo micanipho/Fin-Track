@@ -31,11 +31,11 @@ print_error() {
 
 # Check if .env file exists, if not copy from example
 check_env_file() {
-    if [ ! -f .env ]; then
-        print_warning ".env file not found. Creating from .env.example..."
-        cp .env.example .env
-        print_status "Please update .env file with your actual values before continuing."
-        print_status "Edit the .env file with: nano .env"
+    if [ ! -f backend/.env ]; then
+        print_warning ".env file not found in backend folder. Creating from .env.example..."
+        cp backend/.env.example backend/.env
+        print_status "Please update backend/.env file with your actual values before continuing."
+        print_status "Edit the .env file with: nano backend/.env"
         exit 1
     fi
 }
