@@ -23,7 +23,7 @@ FinTrack is a RESTful API for personal finance management built with Spring Boot
 
 ### Tasks:
 - [ ] **Database Setup**
-  - Configure Microsoft SQL Server database
+  - Configure PostgreSQL database
   - Update application.properties with database connection
   - Create database schema migration structure (Flyway/Liquibase)
 

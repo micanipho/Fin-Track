@@ -1,12 +1,12 @@
 # Sprint 1 Acceptance Criteria
 
-## 1. Configure Microsoft SQL Server database
-- [ ] SQL Server is running and accessible from the application.
+## 1. Configure PostgreSQL database
+- [ ] PostgreSQL is running and accessible from the application.
 - [ ] Connection details are documented in application.properties.
 - [ ] Database can be migrated using Flyway/Liquibase.
 
 ## 2. Update application.properties with database connection
-- [ ] application.properties contains valid SQL Server connection settings.
+- [ ] application.properties contains valid PostgreSQL connection settings.
 - [ ] Application starts without database connection errors.
 
 ## 3. Create database schema migration structure
